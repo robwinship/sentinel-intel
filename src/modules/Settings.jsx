@@ -29,13 +29,15 @@ export default function Settings() {
   const [tplId,       setTplId]      = useState('');
   const [pubKey,      setPubKey]      = useState('');
 
-  const [aiStatus,    setAiStatus]   = useState(null);   // null | 'ok' | 'err'
-  const [aiMsg,       setAiMsg]      = useState('');
-  const [emailStatus, setEmailStatus]= useState(null);
-  const [emailMsg,    setEmailMsg]   = useState('');
-  const [saving,      setSaving]     = useState(false);
-  const [testing,     setTesting]    = useState(false);
-  const [testingEmail,setTestingEmail] = useState(false);
+  const [aiStatus,      setAiStatus]     = useState(null);
+  const [aiMsg,         setAiMsg]        = useState('');
+  const [emailStatus,   setEmailStatus]  = useState(null);
+  const [emailMsg,      setEmailMsg]     = useState('');
+  const [saving,        setSaving]       = useState(false);
+  const [testing,       setTesting]      = useState(false);
+  const [testingEmail,  setTestingEmail] = useState(false);
+  const [discovering,   setDiscovering]  = useState(false);
+  const [discovered,    setDiscovered]   = useState([]);
 
   // Load saved values from localStorage on mount
   useEffect(() => {
@@ -58,6 +60,36 @@ export default function Settings() {
     localStorage.setItem('emailjsTemplateId',tplId);
     localStorage.setItem('emailjsPublicKey', pubKey);
     setTimeout(() => setSaving(false), 800);
+  };
+
+  const discoverModels = async () => {
+    if (!geminiKey) { setAiStatus('err'); setAiMsg('Enter your API key first.'); return; }
+    setDiscovering(true);
+    setDiscovered([]);
+    setAiStatus(null);
+    setAiMsg('');
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${geminiKey}`
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error?.message || `Error ${res.status}`);
+      const generateModels = (data.models || [])
+        .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
+        .map(m => m.name.replace('models/', ''));
+      setDiscovered(generateModels);
+      if (generateModels.length === 0) {
+        setAiStatus('err');
+        setAiMsg('No generateContent models found for this key.');
+      } else {
+        setAiStatus('ok');
+        setAiMsg(`Found ${generateModels.length} compatible model(s). Click one to select it.`);
+      }
+    } catch (err) {
+      setAiStatus('err');
+      setAiMsg(err.message);
+    }
+    setDiscovering(false);
   };
 
   const testAI = async () => {
@@ -184,9 +216,35 @@ export default function Settings() {
                 <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
               </select>
               <div className="settings-hint" style={{ marginTop: 4 }}>
-                If Test Connection returns a 404 or quota error, try a different model.
-                Availability varies by region and project.
+                If Test Connection fails, click <strong>Discover Models</strong> to see what's
+                available for your key, then select one from the list.
               </div>
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={discoverModels}
+                disabled={discovering}
+              >
+                {discovering ? 'Discovering…' : '🔍 Discover Models'}
+              </button>
+              {discovered.length > 0 && (
+                <div style={{ marginTop: 10 }}>
+                  <div className="settings-label">Available models — click to select:</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+                    {discovered.map(m => (
+                      <button
+                        key={m}
+                        className="btn btn-secondary btn-sm"
+                        style={{ fontFamily: 'var(--mono)', fontSize: 11, borderColor: m === geminiModel ? 'var(--accent)' : undefined, color: m === geminiModel ? 'var(--accent)' : undefined }}
+                        onClick={() => setGeminiModel(m)}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </>
         )}
