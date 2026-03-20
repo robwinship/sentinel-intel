@@ -134,7 +134,7 @@ export default function Settings() {
           <label className="settings-label">AI Provider</label>
           <div style={{ display: 'flex', gap: 12 }}>
             {[
-              { id: 'gemini',    label: 'Google Gemini 2.0 Flash (Free)' },
+              { id: 'gemini',    label: 'Google Gemini 1.5 Flash (Free)' },
               { id: 'anthropic', label: 'Anthropic Claude'                },
             ].map(opt => (
               <div key={opt.id} className="sch-opt" style={{ margin: 0 }} onClick={() => setProvider(opt.id)}>
@@ -161,6 +161,7 @@ export default function Settings() {
                   aistudio.google.com
                 </a>
                 {' '}— 1,500 free requests/day. No credit card required.
+                {' '}Model: gemini-1.5-flash-latest.
               </>
             }
           />
