@@ -26,8 +26,9 @@ function buildPrompt(events, market) {
  * Get a free key at: https://aistudio.google.com/
  */
 async function callGemini(apiKey, prompt) {
+  const model = localStorage.getItem('geminiModel') || 'gemini-1.5-flash';
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

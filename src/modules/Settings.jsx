@@ -23,6 +23,7 @@ function Field({ label, hint, type = 'text', placeholder, value, onChange }) {
 export default function Settings() {
   const [provider,    setProvider]   = useState('gemini');
   const [geminiKey,   setGeminiKey]  = useState('');
+  const [geminiModel, setGeminiModel]= useState('gemini-1.5-flash');
   const [anthropicKey,setAnthropicKey] = useState('');
   const [svcId,       setSvcId]      = useState('');
   const [tplId,       setTplId]      = useState('');
@@ -40,6 +41,7 @@ export default function Settings() {
   useEffect(() => {
     setProvider(   localStorage.getItem('aiProvider')      || 'gemini');
     setGeminiKey(  localStorage.getItem('geminiApiKey')    || '');
+    setGeminiModel(localStorage.getItem('geminiModel')     || 'gemini-1.5-flash');
     setAnthropicKey(localStorage.getItem('anthropicApiKey')|| '');
     setSvcId(      localStorage.getItem('emailjsServiceId') || '');
     setTplId(      localStorage.getItem('emailjsTemplateId')|| '');
@@ -50,6 +52,7 @@ export default function Settings() {
     setSaving(true);
     localStorage.setItem('aiProvider',       provider);
     localStorage.setItem('geminiApiKey',     geminiKey);
+    localStorage.setItem('geminiModel',      geminiModel);
     localStorage.setItem('anthropicApiKey',  anthropicKey);
     localStorage.setItem('emailjsServiceId', svcId);
     localStorage.setItem('emailjsTemplateId',tplId);
@@ -61,6 +64,7 @@ export default function Settings() {
     // Persist current form values before testing so generateAISummary reads them
     localStorage.setItem('aiProvider',      provider);
     localStorage.setItem('geminiApiKey',    geminiKey);
+    localStorage.setItem('geminiModel',     geminiModel);
     localStorage.setItem('anthropicApiKey', anthropicKey);
     setTesting(true);
     setAiStatus(null);
@@ -148,23 +152,43 @@ export default function Settings() {
         </div>
 
         {provider === 'gemini' && (
-          <Field
-            label="Gemini API Key"
-            type="password"
-            placeholder="AIza…"
-            value={geminiKey}
-            onChange={setGeminiKey}
-            hint={
-              <>
-                Free at{' '}
-                <a href="https://aistudio.google.com/" target="_blank" rel="noreferrer">
-                  aistudio.google.com
-                </a>
-                {' '}— 1,500 free requests/day. No credit card required.
-                {' '}Model: gemini-1.5-flash-latest.
-              </>
-            }
-          />
+          <>
+            <Field
+              label="Gemini API Key"
+              type="password"
+              placeholder="AIza…"
+              value={geminiKey}
+              onChange={setGeminiKey}
+              hint={
+                <>
+                  Free at{' '}
+                  <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">
+                    aistudio.google.com
+                  </a>
+                  {' '}— 1,500 free requests/day. No credit card required.
+                </>
+              }
+            />
+            <div style={{ marginBottom: 12 }}>
+              <label className="settings-label">Gemini Model</label>
+              <select
+                className="sel"
+                style={{ width: '100%', padding: '8px 12px', borderRadius: 'var(--r)', fontSize: 13 }}
+                value={geminiModel}
+                onChange={e => setGeminiModel(e.target.value)}
+              >
+                <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+                <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b</option>
+                <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+                <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+                <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
+              </select>
+              <div className="settings-hint" style={{ marginTop: 4 }}>
+                If Test Connection returns a 404 or quota error, try a different model.
+                Availability varies by region and project.
+              </div>
+            </div>
+          </>
         )}
 
         {provider === 'anthropic' && (
