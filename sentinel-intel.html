@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SENTINEL INTEL — Executive Security Platform</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c10;--bg2:#0d1117;--bg3:#131920;--bg4:#1a2330;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e8edf3;--text2:#8a9bb0;--text3:#4a5a6a;
+  --accent:#00d4ff;--accent2:#0099bb;--accent-glow:rgba(0,212,255,0.12);
+  --red:#ff2d55;--orange:#ff9500;--yellow:#ffd60a;--green:#30d158;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;--display:'Syne',sans-serif;
+  --r:8px;--r2:12px;
+}
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+html,body,#root{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
+.app{display:flex;min-height:100vh}
+/* SIDEBAR */
+.sidebar{width:220px;min-height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex-shrink:0}
+.logo{padding:20px 20px 16px;border-bottom:1px solid var(--border)}
+.logo-mark{font-family:var(--display);font-size:17px;font-weight:800;color:var(--accent);letter-spacing:-.02em;line-height:1.1}
+.logo-sub{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-top:3px}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 0}
+.nav-btn{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;border:none;background:none;width:100%;text-align:left;color:var(--text2);font-family:var(--sans);font-size:13px;font-weight:500;transition:all .15s;border-left:2px solid transparent}
+.nav-btn:hover{background:var(--bg3);color:var(--text)}
+.nav-btn.active{background:var(--accent-glow);color:var(--accent);border-left-color:var(--accent)}
+.nav-icon{font-size:13px;width:18px;text-align:center}
+.sidebar-foot{padding:12px 16px;border-top:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--text3)}
+.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10}
+.topbar-title{font-family:var(--display);font-size:16px;font-weight:700;flex:1}
+.topbar-time{font-family:var(--mono);font-size:11px;color:var(--text3)}
+.content{flex:1;padding:24px;overflow-y:auto}
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.02em;transition:all .15s}
+.btn-primary{background:var(--accent);color:#000}
+.btn-primary:hover{background:#33ddff}
+.btn-secondary{background:var(--bg3);color:var(--text2);border:1px solid var(--border2)}
+.btn-secondary:hover{background:var(--bg4);color:var(--text)}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+/* LAYOUT */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:20px}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-family:var(--display);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text2)}
+.card-accent{border-color:rgba(0,212,255,.2)}
+.card-accent .card-title{color:var(--accent)}
+/* STATS */
+.stat{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;text-align:center}
+.stat-val{font-family:var(--display);font-size:28px;font-weight:800}
+.stat-lbl{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px;letter-spacing:.06em;text-transform:uppercase}
+/* SEVERITY */
+.sev{padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.06em}
+.sev-CRITICAL{background:rgba(255,45,85,.15);color:#ff2d55;border:1px solid rgba(255,45,85,.3)}
+.sev-HIGH{background:rgba(255,149,0,.15);color:#ff9500;border:1px solid rgba(255,149,0,.3)}
+.sev-MODERATE{background:rgba(255,214,10,.12);color:#ffd60a;border:1px solid rgba(255,214,10,.3)}
+.sev-LOW{background:rgba(48,209,88,.1);color:#30d158;border:1px solid rgba(48,209,88,.3)}
+/* EVENTS */
+.ev{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;cursor:pointer;transition:all .15s}
+.ev:hover{border-color:var(--border2);background:var(--bg4)}
+.ev.open{border-color:var(--accent2)}
+.ev-hdr{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.ev-title{font-size:14px;font-weight:600;flex:1;line-height:1.4}
+.ev-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-family:var(--mono);font-size:10px;color:var(--text3)}
+.ev-tag{background:var(--bg4);border:1px solid var(--border);padding:2px 7px;border-radius:3px;color:var(--text2)}
+.dev-tag{background:rgba(255,149,0,.1);border:1px solid rgba(255,149,0,.3);color:#ff9500;padding:2px 7px;border-radius:3px;font-family:var(--mono);font-size:10px;animation:flash 1.5s infinite}
+@keyframes flash{0%,100%{opacity:1}50%{opacity:.5}}
+.ev-body{font-size:13px;color:var(--text2);line-height:1.6;margin:10px 0}
+.ev-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.ev-det{background:var(--bg2);border-radius:6px;padding:10px}
+.ev-det-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:4px}
+.ev-det-val{font-size:12px;color:var(--text2);line-height:1.5}
+.ev-link{color:var(--accent);font-size:11px;text-decoration:none;font-family:var(--mono);display:inline-flex;align-items:center;gap:4px;margin-top:10px}
+.ev-link:hover{color:#33ddff}
+/* MARKET */
+.mkt-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.mkt-row:last-child{border-bottom:none}
+.mkt-sym{font-family:var(--mono);font-size:12px;font-weight:500}
+.mkt-type{font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px}
+.mkt-val{font-family:var(--mono);font-size:13px;font-weight:600}
+.mkt-chg{font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:4px}
+.up{color:var(--green);background:rgba(48,209,88,.1)}
+.dn{color:var(--red);background:rgba(255,45,85,.1)}
+.fl{color:var(--orange);background:rgba(255,149,0,.12)}
+/* AI PANEL */
+.ai-panel{background:linear-gradient(135deg,rgba(0,212,255,.04) 0%,var(--bg2) 100%);border:1px solid rgba(0,212,255,.15);border-radius:var(--r2);padding:20px;margin-bottom:20px}
+.ai-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.ai-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+.ai-title{font-family:var(--display);font-size:14px;font-weight:700;color:var(--accent)}
+.ai-body{font-size:13px;color:var(--text2);line-height:1.7;white-space:pre-wrap}
+.ai-dim{color:var(--text3);font-family:var(--mono);font-size:12px}
+/* FILTERS */
+.filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);align-items:center}
+.filter-lbl{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+select.sel{background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:5px 10px;border-radius:5px;font-size:12px;font-family:var(--sans);cursor:pointer;outline:none}
+select.sel:hover{border-color:var(--accent2)}
+/* SECTION */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.sec-title{font-family:var(--display);font-size:20px;font-weight:800}
+.sec-sub{font-size:13px;color:var(--text3);margin-top:2px}
+/* SCHEDULE */
+.sch-opt{display:flex;align-items:center;gap:10px;margin-bottom:8px;cursor:pointer}
+.radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.radio.on{border-color:var(--accent)}
+.radio-dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.num-inp{background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:6px 10px;border-radius:5px;width:70px;font-family:var(--mono);font-size:13px;outline:none;text-align:center}
+.num-inp:focus{border-color:var(--accent)}
+/* SOURCES */
+.src-table{width:100%;border-collapse:collapse}
+.src-table th{text-align:left;padding:8px 12px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap}
+.src-table td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px}
+.src-table tr:last-child td{border-bottom:none}
+.src-table tr:hover td{background:var(--bg3)}
+.src-badge{padding:2px 8px;border-radius:3px;font-family:var(--mono);font-size:10px;background:var(--bg4);border:1px solid var(--border);color:var(--text2)}
+.tog{width:36px;height:20px;border-radius:10px;cursor:pointer;display:flex;align-items:center;transition:background .2s}
+.tog.on{background:var(--accent)}
+.tog.off{background:var(--bg4);border:1px solid var(--border2)}
+.tog-thumb{width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s;margin:3px}
+/* WATCHLIST */
+.watch-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;margin-bottom:6px}
+.rm-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0 4px}
+.rm-btn:hover{color:var(--red)}
+/* SCAN HISTORY */
+.scan-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px}
+.scan-row:last-child{border-bottom:none}
+/* MISC */
+.tag{display:inline-block;padding:2px 8px;border-radius:3px;font-family:var(--mono);font-size:10px;background:var(--bg4);color:var(--text2);border:1px solid var(--border)}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.empty{text-align:center;padding:40px;color:var(--text3);font-size:13px}
+.cred-bar{background:var(--bg4);border-radius:3px;height:4px;width:60px;overflow:hidden}
+.alert-banner{background:rgba(255,45,85,.08);border:1px solid rgba(255,45,85,.25);border-radius:var(--r);padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text)}
+.export-pre{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:20px;font-size:12px;line-height:1.8;color:var(--text2);font-family:var(--mono);white-space:pre-wrap;max-height:380px;overflow-y:auto}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const {useState,useEffect,useCallback,useRef} = React;
+
+/* ─── DATA ─────────────────────────────────────────────────────── */
+const SEV = {CRITICAL:{rank:4},HIGH:{rank:3},MODERATE:{rank:2},LOW:{rank:1}};
+const REGIONS = ["All","Regional","Provincial","National","International"];
+const CATS = ["All","Civil Unrest","Terror","Cybersecurity","Infrastructure","Transportation","Weather","Crime","Government","Border","Public Safety"];
+const MODULES = ["Dashboard","Regional Intel","Global Intel","Market Monitor","Alerts","Watchlist","Sources","Schedule","Scan History","Export Brief"];
+const ICONS = ["◼","🗺","🌐","📈","🔔","⭐","📡","⏱","📋","📄"];
+
+const SOURCES_INIT = [
+  {id:1,name:"Reuters",type:"Newswire",url:"feeds.reuters.com/reuters/topNews",region:"International",active:true,cred:95},
+  {id:2,name:"CBC News",type:"TV/News",url:"cbc.ca/cmlink/rss-topstories",region:"National",active:true,cred:92},
+  {id:3,name:"Globe and Mail",type:"Newspaper",url:"theglobeandmail.com/rss/",region:"National",active:true,cred:90},
+  {id:4,name:"Public Safety Canada",type:"Government",url:"publicsafety.gc.ca",region:"National",active:true,cred:98},
+  {id:5,name:"CISA Advisories",type:"Cybersecurity",url:"cisa.gov/cybersecurity-advisories",region:"International",active:true,cred:99},
+  {id:6,name:"Toronto Star",type:"Newspaper",url:"thestar.com",region:"Provincial",active:true,cred:85},
+  {id:7,name:"BBC World",type:"TV/News",url:"feeds.bbci.co.uk/news/world/rss.xml",region:"International",active:true,cred:94},
+  {id:8,name:"AP News",type:"Newswire",url:"apnews.com",region:"International",active:true,cred:93},
+  {id:9,name:"RCMP News",type:"Law Enforcement",url:"rcmp-grc.gc.ca",region:"National",active:true,cred:97},
+  {id:10,name:"Environment Canada",type:"Government",url:"weather.gc.ca",region:"National",active:true,cred:96},
+];
+
+const EVENTS_INIT = [
+  {id:"e1",headline:"Major cyberattack targets Canadian financial institutions",source:"CBC News",sourceType:"TV/News",dt:"2026-03-19T08:14:00Z",region:"National",cat:"Cybersecurity",sev:"CRITICAL",synopsis:"A coordinated ransomware campaign has affected multiple Canadian banks and credit unions. Operations disrupted at three major institutions. CISA and CCCS have issued joint advisory.",op:"High — payment systems may experience delays.",cyber:"Ransomware deployment confirmed across sector.",travel:"None.",bcp:"Activate cyber response protocols immediately.",developing:true,url:"https://www.cbc.ca/"},
+  {id:"e2",headline:"Protest disrupts Toronto downtown core — transit rerouted",source:"Toronto Star",sourceType:"Newspaper",dt:"2026-03-19T07:30:00Z",region:"Provincial",cat:"Civil Unrest",sev:"HIGH",synopsis:"Several hundred demonstrators gathered at Queen and Bay, disrupting TTC routes. Police presence maintained order. Expected to continue through afternoon.",op:"Office access and employee commutes affected.",cyber:"None.",travel:"Avoid downtown core until 18:00 EST.",bcp:"Remote work recommended for downtown staff.",developing:true,url:"https://www.thestar.com/"},
+  {id:"e3",headline:"US-Canada border crossings experiencing multi-hour delays",source:"Globe and Mail",sourceType:"Newspaper",dt:"2026-03-19T06:00:00Z",region:"National",cat:"Border",sev:"HIGH",synopsis:"Enhanced screening protocols implemented at four major Canada-US border crossings. Commercial vehicle wait times exceed 4 hours. CBSA attributes to new regulatory checks.",op:"Supply chain and logistics delays expected.",cyber:"None.",travel:"Allow 4–6 extra hours for cross-border travel.",bcp:"Review just-in-time supply dependencies.",developing:false,url:"https://www.theglobeandmail.com/"},
+  {id:"e4",headline:"Severe ice storm warning issued for Ottawa-Gatineau region",source:"Environment Canada",sourceType:"Government",dt:"2026-03-19T05:45:00Z",region:"Regional",cat:"Weather",sev:"MODERATE",synopsis:"Environment Canada has issued a freezing rain warning. Accumulation of 20–30mm of ice expected overnight. Power outages and road closures are probable.",op:"Facility access disruptions likely.",cyber:"Data centre power redundancy should be verified.",travel:"Avoid non-essential travel in affected area.",bcp:"Verify backup power and remote access readiness.",developing:true,url:"https://weather.gc.ca/"},
+  {id:"e5",headline:"CISA issues critical vulnerability advisory for industrial control systems",source:"CISA Advisories",sourceType:"Cybersecurity",dt:"2026-03-19T03:00:00Z",region:"International",cat:"Cybersecurity",sev:"CRITICAL",synopsis:"CISA has published an advisory regarding a zero-day vulnerability in widely-deployed SCADA systems. Active exploitation confirmed in US energy sector. Patch not yet available.",op:"Facilities using affected ICS must isolate systems.",cyber:"Immediate network segmentation required.",travel:"None.",bcp:"Engage OT security team for emergency assessment.",developing:true,url:"https://www.cisa.gov/"},
+  {id:"e6",headline:"G7 foreign ministers condemn escalating regional conflict",source:"Reuters",sourceType:"Newswire",dt:"2026-03-18T22:00:00Z",region:"International",cat:"Government",sev:"MODERATE",synopsis:"G7 foreign ministers issued a joint statement condemning ongoing hostilities. Additional sanctions against energy exports are under discussion and may affect commodity markets.",op:"Monitor supply chain exposure.",cyber:"Heightened state-sponsored threat activity anticipated.",travel:"Review travel advisories for affected region.",bcp:"Review counterparty exposure to sanction risk.",developing:false,url:"https://www.reuters.com/"},
+  {id:"e7",headline:"Organized crime network dismantled in Montreal drug operation",source:"RCMP News",sourceType:"Law Enforcement",dt:"2026-03-18T18:30:00Z",region:"Regional",cat:"Crime",sev:"LOW",synopsis:"RCMP announced the arrest of 23 individuals in a coordinated takedown of a drug trafficking network operating across Quebec. No direct corporate or infrastructure targets identified.",op:"Low.",cyber:"None.",travel:"None.",bcp:"No action required.",developing:false,url:"https://www.rcmp-grc.gc.ca/"},
+  {id:"e8",headline:"Major airport systems outage grounds flights across North America",source:"AP News",sourceType:"Newswire",dt:"2026-03-19T09:00:00Z",region:"International",cat:"Transportation",sev:"HIGH",synopsis:"A software failure in air traffic management systems has caused widespread flight delays and cancellations. Cyber sabotage not yet ruled out.",op:"Executive and staff travel severely impacted.",cyber:"Possible — investigation ongoing.",travel:"Critical — reschedule non-essential air travel.",bcp:"Activate virtual meeting contingencies for travel-dependent meetings.",developing:true,url:"https://apnews.com/"},
+];
+
+const MARKET = [
+  {sym:"S&P 500",val:5412.30,chg:+18.45,pct:+0.34,type:"Index"},
+  {sym:"TSX",val:22187.60,chg:-43.20,pct:-0.19,type:"Index"},
+  {sym:"Dow Jones",val:40284.10,chg:+124.70,pct:+0.31,type:"Index"},
+  {sym:"Nasdaq",val:17092.40,chg:+67.30,pct:+0.40,type:"Index"},
+  {sym:"VIX",val:18.42,chg:+2.11,pct:+12.93,type:"Volatility"},
+  {sym:"WTI Oil",val:81.34,chg:-1.20,pct:-1.45,type:"Commodity"},
+  {sym:"Gold",val:2318.50,chg:+12.40,pct:+0.54,type:"Commodity"},
+  {sym:"Nat Gas",val:1.94,chg:-0.08,pct:-3.96,type:"Commodity"},
+  {sym:"USD/CAD",val:1.3542,chg:+0.0031,pct:+0.23,type:"FX"},
+  {sym:"10Y UST",val:4.312,chg:+0.018,pct:+0.42,type:"Bond"},
+];
+
+const TICKERS = [
+  {sym:"SHOP.TO",val:98.42,chg:+1.20,pct:+1.23},
+  {sym:"RY.TO",val:133.65,chg:-0.45,pct:-0.34},
+  {sym:"ENB.TO",val:49.83,chg:+0.22,pct:+0.44},
+  {sym:"AAPL",val:212.14,chg:+3.10,pct:+1.48},
+  {sym:"MSFT",val:419.22,chg:+5.80,pct:+1.40},
+];
+
+/* ─── HELPERS ──────────────────────────────────────────────────── */
+function fmtDt(iso){
+  return new Date(iso).toLocaleString("en-CA",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+}
+function fmtTime(d){
+  return d.toLocaleTimeString("en-CA",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+}
+function fmtDate(d){
+  return d.toLocaleDateString("en-CA",{weekday:"short",year:"numeric",month:"short",day:"numeric"});
+}
+
+/* ─── SUB-COMPONENTS ───────────────────────────────────────────── */
+function Sev({s}){return <span className={`sev sev-${s}`}>{s}</span>}
+
+function MktRow({item}){
+  const up=item.pct>=0, vix=item.sym==="VIX"&&item.val>20;
+  const cls=vix?"fl":up?"up":"dn";
+  return(
+    <div className="mkt-row">
+      <div><div className="mkt-sym">{item.sym}</div><div className="mkt-type">{item.type}</div></div>
+      <div style={{textAlign:"right"}}>
+        <div className="mkt-val">{item.sym==="USD/CAD"?item.val.toFixed(4):item.val.toLocaleString("en",{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+        <div className={`mkt-chg ${cls}`}>{up?"+":""}{item.pct.toFixed(2)}%</div>
+      </div>
+    </div>
+  );
+}
+
+function EvCard({ev,defaultOpen}){
+  const [open,setOpen]=useState(!!defaultOpen);
+  const src=SOURCES_INIT.find(s=>s.name===ev.source);
+  return(
+    <div className={`ev ${open?"open":""}`} onClick={()=>setOpen(o=>!o)}>
+      <div className="ev-hdr">
+        <div className="ev-title">{ev.headline}</div>
+        <Sev s={ev.sev}/>
+      </div>
+      <div className="ev-meta">
+        <span className="ev-tag">{ev.region}</span>
+        <span className="ev-tag">{ev.cat}</span>
+        <span className="ev-tag">{ev.source}</span>
+        <span>{fmtDt(ev.dt)}</span>
+        {ev.developing&&<span className="dev-tag">● DEVELOPING</span>}
+      </div>
+      {open&&(
+        <div onClick={e=>e.stopPropagation()}>
+          <p className="ev-body">{ev.synopsis}</p>
+          <div className="ev-grid">
+            {[["Operational Impact",ev.op],["Cyber Impact",ev.cyber],["Travel Impact",ev.travel],["Business Continuity",ev.bcp]].map(([l,v])=>(
+              <div className="ev-det" key={l}><div className="ev-det-lbl">{l}</div><div className="ev-det-val">{v}</div></div>
+            ))}
+          </div>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:12}}>
+            <a href={ev.url} target="_blank" rel="noreferrer" className="ev-link">↗ View Source ({ev.sourceType})</a>
+            {src&&<span style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--text3)"}}>Credibility: {src.cred}/100</span>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── MODULES ──────────────────────────────────────────────────── */
+function Dashboard({events,scanState,onScan,lastScan,aiText,aiLoading,onAI}){
+  const crit=events.filter(e=>e.sev==="CRITICAL");
+  const high=events.filter(e=>e.sev==="HIGH");
+  const dev=events.filter(e=>e.developing);
+  const top5=[...events].sort((a,b)=>SEV[b.sev].rank-SEV[a.sev].rank).slice(0,5);
+  return(
+    <div>
+      <div className="sec-hdr">
+        <div><div className="sec-title">Executive Security Brief</div><div className="sec-sub">{lastScan?`Last scan: ${fmtDt(lastScan)}`:"No scan yet"}</div></div>
+        <div style={{display:"flex",gap:8}}>
+          <button className="btn btn-secondary btn-sm" onClick={onAI} disabled={aiLoading}>{aiLoading?"Generating…":"✦ AI Brief"}</button>
+          <button className="btn btn-primary btn-sm" onClick={onScan} disabled={scanState==="running"}>{scanState==="running"?"⟳ Scanning…":"▶ Run Scan Now"}</button>
+        </div>
+      </div>
+      <div className="g4" style={{marginBottom:16}}>
+        <div className="stat"><div className="stat-val" style={{color:"var(--red)"}}>{crit.length}</div><div className="stat-lbl">Critical</div></div>
+        <div className="stat"><div className="stat-val" style={{color:"var(--orange)"}}>{high.length}</div><div className="stat-lbl">High</div></div>
+        <div className="stat"><div className="stat-val" style={{color:"var(--yellow)"}}>{dev.length}</div><div className="stat-lbl">Developing</div></div>
+        <div className="stat"><div className="stat-val">{events.length}</div><div className="stat-lbl">Total Events</div></div>
+      </div>
+      <div className="ai-panel">
+        <div className="ai-hdr">
+          <div className="ai-dot"/>
+          <div className="ai-title">AI Executive Summary</div>
+          <span style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--text3)",marginLeft:"auto"}}>Powered by Claude</span>
+        </div>
+        {aiLoading?<div className="ai-dim">Generating executive brief…</div>
+          :aiText?<div className="ai-body">{aiText}</div>
+          :<div className="ai-dim">Click "✦ AI Brief" to generate an AI executive summary of current intelligence.</div>}
+      </div>
+      <div className="g2">
+        <div>
+          <div className="card-title" style={{marginBottom:12}}>Top Priority Events</div>
+          {top5.map(e=><EvCard key={e.id} ev={e}/>)}
+        </div>
+        <div>
+          <div className="card card-accent" style={{marginBottom:16}}>
+            <div className="card-hdr"><div className="card-title">Market Intelligence</div><span style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--text3)"}}>INDICATIVE</span></div>
+            {MARKET.slice(0,6).map(m=><MktRow key={m.sym} item={m}/>)}
+          </div>
+          <div className="card">
+            <div className="card-hdr"><div className="card-title">Watchlist Tickers</div></div>
+            {TICKERS.map(m=><MktRow key={m.sym} item={m}/>)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RegionalIntel({events}){
+  const [reg,setReg]=useState("All");
+  const [cat,setCat]=useState("All");
+  const [sev,setSev]=useState("All");
+  const filtered=events.filter(e=>(reg==="All"||e.region===reg)&&(cat==="All"||e.cat===cat)&&(sev==="All"||e.sev===sev));
+  const groups={Regional:[],Provincial:[],National:[],International:[]};
+  filtered.forEach(e=>{if(groups[e.region])groups[e.region].push(e);});
+  return(
+    <div>
+      <div className="sec-hdr"><div><div className="sec-title">Regional Intelligence</div><div className="sec-sub">Events grouped by geographic scope</div></div></div>
+      <div className="filter-bar">
+        <span className="filter-lbl">Region</span>
+        <select className="sel" value={reg} onChange={e=>setReg(e.target.value)}>{REGIONS.map(r=><option key={r}>{r}</option>)}</select>
+        <span className="filter-lbl" style={{marginLeft:8}}>Category</span>
+        <select className="sel" value={cat} onChange={e=>setCat(e.target.value)}>{CATS.map(c=><option key={c}>{c}</option>)}</select>
+        <span className="filter-lbl" style={{marginLeft:8}}>Severity</span>
+        <select className="sel" value={sev} onChange={e=>setSev(e.target.value)}>{["All","CRITICAL","HIGH","MODERATE","LOW"].map(s=><option key={s}>{s}</option>)}</select>
+        <span style={{marginLeft:"auto",fontFamily:"var(--mono)",fontSize:11,color:"var(--text3)"}}>{filtered.length} events</span>
+      </div>
+      {Object.entries(groups).map(([grp,evts])=>(
+        (reg==="All"||reg===grp)&&(
+          <div key={grp} style={{marginBottom:24}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+              <div style={{fontFamily:"var(--display)",fontSize:14,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em"}}>{grp}</div>
+              <span className="tag">{evts.length} event{evts.length!==1?"s":""}</span>
+            </div>
+            {evts.length===0?<div className="empty">No events</div>:evts.map(e=><EvCard key={e.id} ev={e}/>)}
+          </div>
+        )
+      ))}
+    </div>
+  );
+}
+
+function GlobalIntel({events}){
+  const intl=events.filter(e=>e.region==="International");
+  return(
+    <div>
+      <div className="sec-hdr"><div><div className="sec-title">Global Intelligence</div><div className="sec-sub">International events and emerging global threats</div></div></div>
+      {intl.length===0?<div className="empty">No international events in current scan</div>:intl.map(e=><EvCard key={e.id} ev={e}/>)}
+    </div>
+  );
+}
+
+function MarketMonitor(){
+  return(
+    <div>
+      <div className="sec-hdr"><div><div className="sec-title">Market Monitor</div><div className="sec-sub">Key financial indicators and volatility signals</div></div></div>
+      <div className="g2" style={{marginBottom:16}}>
+        <div className="card card-accent">
+          <div className="card-hdr"><div className="card-title">Major Indices</div></div>
+          {MARKET.filter(m=>m.type==="Index").map(m=><MktRow key={m.sym} item={m}/>)}
+        </div>
+        <div className="card">
+          <div className="card-hdr"><div className="card-title">Volatility &amp; Bonds</div></div>
+          {MARKET.filter(m=>m.type==="Volatility"||m.type==="Bond").map(m=><MktRow key={m.sym} item={m}/>)}
+          <hr className="divider"/>
+          <div className="card-title" style={{marginBottom:8}}>FX</div>
+          {MARKET.filter(m=>m.type==="FX").map(m=><MktRow key={m.sym} item={m}/>)}
+        </div>
+      </div>
+      <div className="g2">
+        <div className="card">
+          <div className="card-hdr"><div className="card-title">Commodities</div></div>
+          {MARKET.filter(m=>m.type==="Commodity").map(m=><MktRow key={m.sym} item={m}/>)}
+        </div>
+        <div className="card">
+          <div className="card-hdr"><div className="card-title">Watchlist Tickers</div></div>
+          {TICKERS.map(m=><MktRow key={m.sym} item={m}/>)}
+        </div>
+      </div>
+      <div className="card" style={{marginTop:16,borderColor:"rgba(255,149,0,.2)"}}>
+        <div className="card-hdr"><div className="card-title" style={{color:"var(--orange)"}}>⚠ Market Risk Signal</div><span className="sev sev-HIGH">HIGH</span></div>
+        <p style={{fontSize:13,color:"var(--text2)",lineHeight:1.6}}>VIX at <strong style={{color:"var(--orange)"}}>18.42</strong> (+12.93%) indicates elevated market anxiety. Combined with border disruptions and the ongoing cyberattack on financial institutions, executives should anticipate potential liquidity and operational disruptions. Oil declining 1.45% may reflect demand-side concerns tied to geopolitical uncertainty.</p>
+      </div>
+    </div>
+  );
+}
+
+function Alerts({events}){
+  const hi=events.filter(e=>e.sev==="CRITICAL"||e.sev==="HIGH");
+  return(
+    <div>
+      <div className="sec-hdr">
+        <div><div className="sec-title">Active Alerts</div><div className="sec-sub">High and critical severity events</div></div>
+        <span className="sev sev-CRITICAL">{hi.length} Active</span>
+      </div>
+      {hi.length===0?<div className="empty">No active alerts</div>:hi.map(e=><EvCard key={e.id} ev={e} defaultOpen={e.sev==="CRITICAL"}/>)}
+    </div>
+  );
+}
+
+function Watchlist(){
+  const [list,setList]=useState([
+    {id:1,type:"Region",val:"Ontario"},
+    {id:2,type:"Ticker",val:"SHOP.TO"},
+    {id:3,type:"Keyword",val:"Ransomware"},
+    {id:4,type:"Topic",val:"Border Security"},
+  ]);
+  const [type,setType]=useState("Region");
+  const [val,setVal]=useState("");
+  const types=["Region","Company","Ticker","Keyword","Topic"];
+  const add=()=>{if(!val.trim())return;setList(l=>[...l,{id:Date.now(),type,val}]);setVal("");};
+  const rm=(id)=>setList(l=>l.filter(i=>i.id!==id));
+  const grouped={};types.forEach(t=>{grouped[t]=list.filter(i=>i.type===t);});
+  return(
+    <div>
+      <div className="sec-hdr"><div><div className="sec-title">Watchlists</div><div className="sec-sub">Regions, companies, tickers, keywords, and topics</div></div></div>
+      <div className="card" style={{marginBottom:20}}>
+        <div className="card-hdr"><div className="card-title">Add to Watchlist</div></div>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <select className="sel" value={type} onChange={e=>setType(e.target.value)}>{types.map(t=><option key={t}>{t}</option>)}</select>
+          <input type="text" className="num-inp" style={{width:200,textAlign:"left"}} placeholder={`Add ${type}…`} value={val}
+            onChange={e=>setVal(e.target.value)} onKeyDown={e=>e.key==="Enter"&&add()}/>
+          <button className="btn btn-primary btn-sm" onClick={add}>+ Add</button>
+        </div>
+      </div>
+      {types.map(t=>(
+        <div key={t} style={{marginBottom:20}}>
+          <div style={{fontFamily:"var(--display)",fontSize:12,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",color:"var(--text2)",marginBottom:8}}>{t}s ({grouped[t].length})</div>
+          {grouped[t].length===0?<div style={{color:"var(--text3)",fontSize:12,fontFamily:"var(--mono)",padding:"6px 0"}}>None added</div>
+            :grouped[t].map(i=>(
+              <div className="watch-item" key={i.id}>
+                <div>
+                  <div style={{fontSize:13,fontWeight:500}}>{i.val}</div>
+                  <div style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--text3)"}}>{i.type}</div>
+                </div>
+                <button className="rm-btn" onClick={()=>rm(i.id)}>✕</button>
+              </div>
+            ))
+          }
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Sources(){
+  const [srcs,setSrcs]=useState(SOURCES_INIT);
+  const tog=(id)=>setSrcs(s=>s.map(x=>x.id===id?{...x,active:!x.active}:x));
+  return(
+    <div>
+      <div className="sec-hdr">
+        <div><div className="sec-title">Source Configuration</div><div className="sec-sub">Manage monitored intelligence sources</div></div>
+        <span style={{fontFamily:"var(--mono)",fontSize:11,color:"var(--text3)"}}>{srcs.filter(s=>s.active).length}/{srcs.length} active</span>
+      </div>
+      <div className="card">
+        <table className="src-table">
+          <thead><tr><th>Source</th><th>Type</th><th>Region</th><th>Credibility</th><th>Active</th></tr></thead>
+          <tbody>
+            {srcs.map(s=>(
+              <tr key={s.id}>
+                <td><div style={{fontWeight:600}}>{s.name}</div><div style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--text3)",marginTop:2}}>{s.url}</div></td>
+                <td><span className="src-badge">{s.type}</span></td>
+                <td style={{fontFamily:"var(--mono)",fontSize:11}}>{s.region}</td>
+                <td>
+                  <div style={{display:"flex",alignItems:"center",gap:6}}>
+                    <div className="cred-bar"><div style={{height:"100%",background:s.cred>90?"var(--green)":s.cred>75?"var(--yellow)":"var(--red)",width:`${s.cred}%`,borderRadius:3}}/></div>
+                    <span style={{fontFamily:"var(--mono)",fontSize:10}}>{s.cred}</span>
+                  </div>
+                </td>
+                <td><div className={`tog ${s.active?"on":"off"}`} onClick={()=>tog(s.id)}><div className={`tog-thumb`} style={{transform:s.active?"translateX(16px)":"none"}}/></div></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function Schedule({onScan,scanState}){
+  const [mode,setMode]=useState("every4h");
+  const [tpd,setTpd]=useState(4);
+  const [alertSev,setAlertSev]=useState("HIGH");
+  const [email,setEmail]=useState("");
+  const [emailOn,setEmailOn]=useState(false);
+  const opts=[{id:"hourly",lbl:"Every hour"},{id:"every2h",lbl:"Every 2 hours"},{id:"every4h",lbl:"Every 4 hours"},{id:"every6h",lbl:"Every 6 hours"},{id:"every12h",lbl:"Every 12 hours"},{id:"daily",lbl:"Once per day"},{id:"custom",lbl:"Custom (times per day)"}];
+  const hrs={hourly:1,every2h:2,every4h:4,every6h:6,every12h:12,daily:24,custom:24/tpd};
+  const next=new Date(Date.now()+(hrs[mode]||4)*3600*1000).toLocaleTimeString("en-CA",{hour:"2-digit",minute:"2-digit"});
+  return(
+    <div>
+      <div className="sec-hdr"><div><div className="sec-title">Scan Schedule</div><div className="sec-sub">Configure automated scan cadence</div></div></div>
+      <div className="g2">
+        <div>
+          <div className="card" style={{marginBottom:16}}>
+            <div className="card-hdr"><div className="card-title">Scan Frequency</div></div>
+            {opts.map(o=>(
+              <div key={o.id} className="sch-opt" onClick={()=>setMode(o.id)}>
+                <div className={`radio ${mode===o.id?"on":""}`}>{mode===o.id&&<div className="radio-dot"/>}</div>
+                <span style={{fontSize:13}}>{o.lbl}</span>
+                {o.id==="custom"&&mode==="custom"&&(
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginLeft:8}} onClick={e=>e.stopPropagation()}>
+                    <input type="number" className="num-inp" min={1} max={24} value={tpd} onChange={e=>setTpd(parseInt(e.target.value)||1)}/>
+                    <span style={{fontSize:12,color:"var(--text2)"}}>times/day</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="card">
+            <div className="card-hdr"><div className="card-title">Alert Thresholds</div></div>
+            <div style={{fontSize:13,color:"var(--text2)",marginBottom:12}}>Notify when severity reaches:</div>
+            {["CRITICAL","HIGH","MODERATE","LOW"].map(s=>(
+              <div key={s} className="sch-opt" onClick={()=>setAlertSev(s)}>
+                <div className={`radio ${alertSev===s?"on":""}`}>{alertSev===s&&<div className="radio-dot"/>}</div>
+                <Sev s={s}/><span style={{fontSize:12,marginLeft:6,color:"var(--text2)"}}>and above</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <div className="card" style={{marginBottom:16}}>
+            <div className="card-hdr"><div className="card-title">Schedule Status</div></div>
+            {[["MODE",mode.toUpperCase()],["NEXT SCAN",next],["ALERT AT",null]].map(([l,v])=>(
+              <div key={l} style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
+                <span style={{fontFamily:"var(--mono)",fontSize:11,color:"var(--text3)"}}>{l}</span>
+                {l==="ALERT AT"?<Sev s={alertSev}/>:<span style={{fontFamily:"var(--mono)",fontSize:11,color:"var(--accent)"}}>{v}</span>}
+              </div>
+            ))}
+            <button className="btn btn-primary" style={{width:"100%",marginTop:12}} onClick={onScan} disabled={scanState==="running"}>
+              {scanState==="running"?"⟳ Scanning…":"▶ Run Scan Now"}
+            </button>
+          </div>
+          <div className="card">
+            <div className="card-hdr"><div className="card-title">Email Digest</div></div>
+            <div style={{fontSize:13,color:"var(--text2)",marginBottom:12}}>Send briefing via email after each scan.</div>
+            <input type="email" className="num-inp" style={{width:"100%",textAlign:"left",marginBottom:10}} placeholder="executive@company.com" value={email} onChange={e=>setEmail(e.target.value)}/>
+            <div className="sch-opt" onClick={()=>setEmailOn(o=>!o)}>
+              <div className={`tog ${emailOn?"on":"off"}`}><div className="tog-thumb" style={{transform:emailOn?"translateX(16px)":"none"}}/></div>
+              <span style={{fontSize:13}}>Enable email digest</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ScanHistory({history}){
+  return(
+    <div>
+      <div className="sec-hdr"><div><div className="sec-title">Scan History</div><div className="sec-sub">Log of all completed intelligence scans</div></div></div>
+      <div className="card">
+        {history.length===0?<div className="empty">No scans yet. Run your first scan from the Dashboard.</div>
+          :history.map((h,i)=>(
+            <div className="scan-row" key={i}>
+              <div style={{width:7,height:7,borderRadius:"50%",background:h.ok?"var(--green)":"var(--red)",flexShrink:0}}/>
+              <div style={{fontFamily:"var(--mono)",fontSize:11,color:"var(--text3)",width:150}}>{fmtDt(h.time)}</div>
+              <div style={{flex:1}}>{h.ok?`Completed — ${h.events} events found`:"Failed — check sources"}</div>
+              <span className="tag">{h.srcs} sources</span>
+              <span className="tag">{h.dur}s</span>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  );
+}
+
+function ExportBrief({events,aiText,onAI,aiLoading}){
+  const hi=events.filter(e=>e.sev==="CRITICAL"||e.sev==="HIGH");
+  const now=new Date().toLocaleString("en-CA");
+  const brief=`EXECUTIVE SECURITY BRIEF\nGenerated: ${now}\n${"─".repeat(60)}\n\nEXECUTIVE SUMMARY\n${aiText||"[Generate AI summary first using the AI Brief button]"}\n\n${"─".repeat(60)}\nTOP SECURITY DEVELOPMENTS\n\n${hi.map((e,i)=>`${i+1}. [${e.sev}] ${e.headline}\n   Region: ${e.region} | Category: ${e.cat}\n   ${e.synopsis}\n   Source: ${e.source} — ${e.url}`).join("\n\n")}\n\n${"─".repeat(60)}\nMARKET SIGNALS\n\n${MARKET.map(m=>`${m.sym.padEnd(12)} ${String(m.val.toFixed(2)).padStart(10)}   ${m.pct>=0?"+":""}${m.pct.toFixed(2)}%`).join("\n")}\n\n${"─".repeat(60)}\nRECOMMENDED PRIORITIES\n\n1. Engage cyber response team for financial sector ransomware event\n2. Issue travel advisory for downtown Toronto and North American airports\n3. Review border crossing logistics with supply chain team\n4. Activate backup power verification for Ottawa facilities\n5. Monitor VIX elevation — review hedging exposure\n\n${"─".repeat(60)}\nCLASSIFICATION: CONFIDENTIAL — FOR EXECUTIVE USE ONLY`.trim();
+  const copy=()=>navigator.clipboard.writeText(brief).catch(()=>{});
+  return(
+    <div>
+      <div className="sec-hdr">
+        <div><div className="sec-title">Executive Brief Export</div><div className="sec-sub">Full intelligence briefing for distribution</div></div>
+        <div style={{display:"flex",gap:8}}>
+          <button className="btn btn-secondary btn-sm" onClick={onAI} disabled={aiLoading}>{aiLoading?"Generating…":"✦ Generate AI Summary"}</button>
+          <button className="btn btn-primary btn-sm" onClick={copy}>Copy Brief</button>
+        </div>
+      </div>
+      <div className="export-pre">{brief}</div>
+    </div>
+  );
+}
+
+/* ─── APP ──────────────────────────────────────────────────────── */
+function App(){
+  const [mod,setMod]=useState(0);
+  const [events]=useState(EVENTS_INIT);
+  const [scanState,setScanState]=useState("idle");
+  const [lastScan,setLastScan]=useState(null);
+  const [history,setHistory]=useState([]);
+  const [aiText,setAiText]=useState("");
+  const [aiLoading,setAiLoading]=useState(false);
+  const [tick,setTick]=useState(new Date());
+
+  useEffect(()=>{
+    const t=setInterval(()=>setTick(new Date()),1000);
+    return()=>clearInterval(t);
+  },[]);
+
+  const runScan=useCallback(async()=>{
+    if(scanState==="running")return;
+    setScanState("running");
+    const t0=Date.now();
+    await new Promise(r=>setTimeout(r,2200));
+    const dur=((Date.now()-t0)/1000).toFixed(1);
+    const now=new Date().toISOString();
+    setHistory(h=>[{time:now,ok:true,events:EVENTS_INIT.length,srcs:SOURCES_INIT.filter(s=>s.active).length,dur},...h]);
+    setLastScan(now);
+    setScanState("idle");
+  },[scanState]);
+
+  const genAI=useCallback(async()=>{
+    if(aiLoading)return;
+    setAiLoading(true);setAiText("");
+    const evtLines=events.sort((a,b)=>SEV[b.sev].rank-SEV[a.sev].rank).slice(0,8)
+      .map(e=>`[${e.sev}] ${e.headline} (${e.region}, ${e.cat}): ${e.synopsis}`).join("\n");
+    const mktLine=MARKET.map(m=>`${m.sym}: ${m.val.toFixed(2)} (${m.pct>=0?"+":""}${m.pct.toFixed(2)}%)`).join(", ");
+    const prompt=`You are an expert executive intelligence analyst. Generate a concise, professional executive security brief based on the following intelligence events and market data. Suitable for a C-suite audience. 3–4 paragraphs max. Start with overall threat assessment, highlight top 2–3 operational risks, market context, then recommended priorities. Professional tone.\n\nINTELLIGENCE EVENTS:\n${evtLines}\n\nMARKET DATA:\n${mktLine}`;
+    try{
+      const res=await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})
+      });
+      const data=await res.json();
+      const text=data.content?.map(b=>b.type==="text"?b.text:"").join("")||"";
+      setAiText(text||"Unable to generate summary. Please try again.");
+    }catch{
+      setAiText("AI summary generation failed. Please verify API connectivity.");
+    }
+    setAiLoading(false);
+  },[events,aiLoading]);
+
+  const critCount=events.filter(e=>e.sev==="CRITICAL").length;
+
+  const render=()=>{
+    switch(mod){
+      case 0:return<Dashboard events={events} scanState={scanState} onScan={runScan} lastScan={lastScan} aiText={aiText} aiLoading={aiLoading} onAI={genAI}/>;
+      case 1:return<RegionalIntel events={events}/>;
+      case 2:return<GlobalIntel events={events}/>;
+      case 3:return<MarketMonitor/>;
+      case 4:return<Alerts events={events}/>;
+      case 5:return<Watchlist/>;
+      case 6:return<Sources/>;
+      case 7:return<Schedule onScan={runScan} scanState={scanState}/>;
+      case 8:return<ScanHistory history={history}/>;
+      case 9:return<ExportBrief events={events} aiText={aiText} onAI={genAI} aiLoading={aiLoading}/>;
+      default:return null;
+    }
+  };
+
+  return(
+    <div className="app">
+      <aside className="sidebar">
+        <div className="logo">
+          <div className="logo-mark">SENTINEL<br/>INTEL</div>
+          <div className="logo-sub">Executive Platform v2.6</div>
+        </div>
+        <nav className="sidebar-nav">
+          {MODULES.map((m,i)=>(
+            <button key={m} className={`nav-btn ${mod===i?"active":""}`} onClick={()=>setMod(i)}>
+              <span className="nav-icon">{ICONS[i]}</span>
+              <span>{m}</span>
+              {i===4&&critCount>0&&<span style={{marginLeft:"auto",background:"var(--red)",color:"#fff",borderRadius:10,padding:"1px 6px",fontSize:9,fontFamily:"var(--mono)"}}>{critCount}</span>}
+            </button>
+          ))}
+        </nav>
+        <div className="sidebar-foot">
+          <div><span className="status-dot"/>SYSTEM ONLINE</div>
+          <div style={{marginTop:4}}>{fmtTime(tick)}</div>
+          <div style={{marginTop:2}}>{SOURCES_INIT.filter(s=>s.active).length} sources active</div>
+        </div>
+      </aside>
+      <div className="main">
+        <header className="topbar">
+          <div className="topbar-title">{MODULES[mod]}</div>
+          <div className="topbar-time">{fmtDate(tick)}</div>
+          {scanState==="running"&&<span style={{fontFamily:"var(--mono)",fontSize:11,color:"var(--accent)"}}>⟳ Scan in progress…</span>}
+        </header>
+        <main className="content">{render()}</main>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
