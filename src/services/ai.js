@@ -22,12 +22,12 @@ function buildPrompt(events, market) {
 }
 
 /**
- * Calls the Google Gemini 1.5 Flash API (free tier).
+ * Calls the Google Gemini 2.0 Flash API (free tier).
  * Get a free key at: https://aistudio.google.com/
  */
 async function callGemini(apiKey, prompt) {
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

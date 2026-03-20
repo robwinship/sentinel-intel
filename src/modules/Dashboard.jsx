@@ -8,7 +8,7 @@ function fmtDt(iso) {
   });
 }
 
-export default function Dashboard({ events, scanState, onScan, lastScan, aiText, aiLoading, onAI }) {
+export default function Dashboard({ events, scanState, onScan, lastScan, aiText, aiLoading, aiError, onAI }) {
   const crit = events.filter(e => e.sev === 'CRITICAL');
   const high = events.filter(e => e.sev === 'HIGH');
   const dev  = events.filter(e => e.developing);
@@ -60,6 +60,17 @@ export default function Dashboard({ events, scanState, onScan, lastScan, aiText,
         </div>
         {aiLoading
           ? <div className="ai-dim">Generating executive brief…</div>
+          : aiError
+            ? (
+              <div>
+                <div style={{ color: 'var(--red)', fontFamily: 'var(--mono)', fontSize: 12, marginBottom: 8 }}>
+                  ✗ {aiError}
+                </div>
+                <div className="ai-dim">
+                  Check your API key in <strong style={{ color: 'var(--text2)' }}>Settings</strong>, then try again.
+                </div>
+              </div>
+            )
           : aiText
             ? <div className="ai-body">{aiText}</div>
             : <div className="ai-dim">Click "✦ AI Brief" to generate an AI executive summary of current intelligence.</div>
